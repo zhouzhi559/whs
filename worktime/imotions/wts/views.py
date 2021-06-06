@@ -3,10 +3,12 @@ from django.http import HttpResponse
 from django.views import View
 import json
 from common.get_companys import get_company_list
-
+import logging
 from pymysql import connect
 from common.db import DB
 import requests
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -151,7 +153,9 @@ class RedisView(View):
                 pawithub_dict = {}
                 conn = db.get_connection("pawithub")
                 sql = """
-                SELECT m_main_department_preset_working_hours FROM pawithub.m_main_department where m_main_department_preset_start_at >= '{0}' and m_main_department_preset_end_at <= '{1}'              
+                SELECT m_main_department_preset_working_hours
+                 FROM pawithub.m_main_department where m_main_department_preset_start_at >= '{0}' 
+                 and m_main_department_preset_end_at <= '{1}'              
                 """
                 sql = sql.format(start_time, end_time)
                 data_departments = db.execute_sql(conn, sql)
@@ -174,7 +178,9 @@ class RedisView(View):
                 wjchin_dict = {}
                 conn = db.get_connection("wjchin")
                 sql = """
-                SELECT m_main_department_preset_working_hours FROM wjchin.m_main_department where m_main_department_preset_start_at >= '{0}' and m_main_department_preset_end_at <= '{1}'
+                SELECT m_main_department_preset_working_hours 
+                FROM wjchin.m_main_department where m_main_department_preset_start_at >= '{0}' 
+                and m_main_department_preset_end_at <= '{1}'
                 """
                 sql = sql.format(start_time, end_time)
                 data_departments = db.execute_sql(conn, sql)
@@ -198,7 +204,9 @@ class RedisView(View):
                 wjip_dict = {}
                 conn = db.get_connection("wjip")
                 sql = """
-                SELECT m_main_department_preset_working_hours FROM wjip.m_main_department where m_main_department_preset_start_at >= '{0}' and m_main_department_preset_end_at <= '{1}'
+                SELECT m_main_department_preset_working_hours 
+                FROM wjip.m_main_department where m_main_department_preset_start_at >= '{0}' 
+                and m_main_department_preset_end_at <= '{1}'
                 """
                 sql = sql.format(start_time, end_time)
                 data_departments = db.execute_sql(conn, sql)
@@ -240,6 +248,7 @@ class RedisView(View):
         data = self.get_company_worktime(start_time, end_time)
 
         data = json.dumps(data)
+
         return HttpResponse(data)
 
 
@@ -275,56 +284,58 @@ class ReadProject(View):
         companys = get_company_list()
         company_list = companys.get_all_databases()
         for company in company_list:
-            # if company == "imotion":
-            #     imotion_pro_dict = {}
-            #     conn = db.get_connection("imotion")
-            #     sql = """
-            #             SELECT project_id,project_name FROM imotion.project_info
-            #         """
-            #
-            #     project_id_names = db.execute_sql(conn, sql)
-            #     db.close_connection(conn)
-            #     print(project_id_names)
-            #     conn = db.get_connection("imotion")
-            #
-            #     for project_ids in project_id_names:
-            #         # for project_id in project_ids:
-            #         sql_main1 = """
-            #           SELECT m_main_code FROM imotion.m_main where m_m_project_id = "{0}" and
-            #           m_main_preset_start_at >= "{1}" and
-            #           m_main_preset_end_at <= "{2}"
-            #         """
-            #         print(project_ids[0])
-            #         print(type(project_ids[0]))
-            #         sql_main = sql_main1.format(project_ids[0], start_time, end_time)
-            #         print("----------------")
-            #         print(sql_main)
-            #         # print(sql_main)
-            #
-            #         project_code = db.execute_sql(conn, sql_main)
-            #
-            #         if len(project_code) != 0:
-            #             for m_main_code in project_code:
-            #                 for main_code_str in m_main_code:
-            #                     print("======")
-            #                     print(project_ids[0])
-            #                     print(main_code_str)
-            #                     sql_code = """
-            #                         SELECT m_main_department_preset_working_hours FROM imotion.m_main_department where m_main_code = '{0}'
-            #                         """
-            #                     sql = sql_code.format(main_code_str)
-            #                     project_time = db.execute_sql(conn, sql)
-            #                     s = 0
-            #                     for one_code_time_tuple in project_time:
-            #                         for one_code_time in one_code_time_tuple:
-            #                             s += int(float(one_code_time))
-            #                     if project_ids[1] not in imotion_pro_dict.keys():
-            #                         imotion_pro_dict[project_ids[1]] = s
-            #                     else:
-            #                         imotion_pro_dict[project_ids[1]] = s + int(imotion_pro_dict[project_ids[1]])
-            #     db.close_connection(conn)
-            #     print("-------")
-            #     print(imotion_pro_dict)
+            if company == "imotion":
+                imotion_pro_dict = {}
+                conn = db.get_connection("imotion")
+                sql = """
+                        SELECT project_id,project_name FROM imotion.project_info
+                    """
+
+                project_id_names = db.execute_sql(conn, sql)
+                db.close_connection(conn)
+                print(project_id_names)
+                conn = db.get_connection("imotion")
+
+                for project_ids in project_id_names:
+                    # for project_id in project_ids:
+                    sql_main1 = """
+                      SELECT m_main_code FROM imotion.m_main where m_m_project_id = "{0}" and
+                      m_main_preset_start_at >= "{1}" and
+                      m_main_preset_end_at <= "{2}"
+                    """
+                    print(project_ids[0])
+                    print(type(project_ids[0]))
+                    sql_main = sql_main1.format(project_ids[0], start_time, end_time)
+                    print("----------------")
+                    print(sql_main)
+                    # print(sql_main)
+
+                    project_code = db.execute_sql(conn, sql_main)
+
+                    if len(project_code) != 0:
+                        for m_main_code in project_code:
+                            for main_code_str in m_main_code:
+                                print("======")
+                                print(project_ids[0])
+                                print(main_code_str)
+                                sql_code = """
+                                    SELECT m_main_department_preset_working_hours FROM imotion.m_main_department where m_main_code = '{0}'
+                                    """
+                                sql = sql_code.format(main_code_str)
+                                project_time = db.execute_sql(conn, sql)
+                                s = 0
+                                for one_code_time_tuple in project_time:
+                                    for one_code_time in one_code_time_tuple:
+                                        s += int(float(one_code_time))
+                                if project_ids[1] not in imotion_pro_dict.keys():
+                                    imotion_pro_dict[project_ids[1]] = s
+                                else:
+                                    imotion_pro_dict[project_ids[1]] = s + int(imotion_pro_dict[project_ids[1]])
+                db.close_connection(conn)
+                print("-------")
+                print(imotion_pro_dict)
+
+                company_project_worktime['imotion'] = imotion_pro_dict
 
             if company == "software":
                 software_pro_dict = {}
@@ -377,9 +388,221 @@ class ReadProject(View):
                 print("-------")
                 print(software_pro_dict)
 
-        company_project_worktime['software'] = software_pro_dict
+                company_project_worktime['software'] = software_pro_dict
 
-        print(company_project_worktime)
+            if company == "wjtech":
+                wjtech_pro_dict = {}
+                conn = db.get_connection("wjtech")
+                sql = """
+                        SELECT project_id,project_name FROM wjtech.project_info
+                    """
+
+                project_id_names = db.execute_sql(conn, sql)
+                db.close_connection(conn)
+                print(project_id_names)
+                conn = db.get_connection("wjtech")
+
+                for project_ids in project_id_names:
+                    # for project_id in project_ids:
+                    sql_main1 = """
+                      SELECT m_main_code FROM wjtech.m_main where m_m_project_id = "{0}" and 
+                      m_main_preset_start_at >= "{1}" and 
+                      m_main_preset_end_at <= "{2}"
+                    """
+                    print(project_ids[0])
+                    print(type(project_ids[0]))
+                    sql_main = sql_main1.format(project_ids[0], start_time, end_time)
+                    print("----------------")
+                    print(sql_main)
+                    # print(sql_main)
+
+                    project_code = db.execute_sql(conn, sql_main)
+
+                    if len(project_code) != 0:
+                        for m_main_code in project_code:
+                            for main_code_str in m_main_code:
+                                print("======")
+                                print(project_ids[0])
+                                print(main_code_str)
+                                sql_code = """
+                                    SELECT m_main_department_preset_working_hours FROM wjtech.m_main_department where m_main_code = '{0}' 
+                                    """
+                                sql = sql_code.format(main_code_str)
+                                project_time = db.execute_sql(conn, sql)
+                                s = 0
+                                for one_code_time_tuple in project_time:
+                                    for one_code_time in one_code_time_tuple:
+                                        s += int(float(one_code_time))
+                                if project_ids[1] not in wjtech_pro_dict.keys():
+                                    wjtech_pro_dict[project_ids[1]] = s
+                                else:
+                                    wjtech_pro_dict[project_ids[1]] = s + int(wjtech_pro_dict[project_ids[1]])
+                db.close_connection(conn)
+                print("-------")
+                print(wjtech_pro_dict)
+
+                company_project_worktime['wjtech'] = wjtech_pro_dict
+
+            if company == "pawithub":
+                pawithub_pro_dict = {}
+                conn = db.get_connection("pawithub")
+                sql = """
+                        SELECT project_id,project_name FROM pawithub.project_info
+                    """
+
+                project_id_names = db.execute_sql(conn, sql)
+                db.close_connection(conn)
+                print(project_id_names)
+                conn = db.get_connection("pawithub")
+
+                for project_ids in project_id_names:
+                    # for project_id in project_ids:
+                    sql_main1 = """
+                      SELECT m_main_code FROM pawithub.m_main where m_m_project_id = "{0}" and 
+                      m_main_preset_start_at >= "{1}" and 
+                      m_main_preset_end_at <= "{2}"
+                    """
+                    print(project_ids[0])
+                    print(type(project_ids[0]))
+                    sql_main = sql_main1.format(project_ids[0], start_time, end_time)
+                    print("----------------")
+                    print(sql_main)
+                    # print(sql_main)
+
+                    project_code = db.execute_sql(conn, sql_main)
+
+                    if len(project_code) != 0:
+                        for m_main_code in project_code:
+                            for main_code_str in m_main_code:
+                                print("======")
+                                print(project_ids[0])
+                                print(main_code_str)
+                                sql_code = """
+                                    SELECT m_main_department_preset_working_hours FROM pawithub.m_main_department where m_main_code = '{0}' 
+                                    """
+                                sql = sql_code.format(main_code_str)
+                                project_time = db.execute_sql(conn, sql)
+                                s = 0
+                                for one_code_time_tuple in project_time:
+                                    for one_code_time in one_code_time_tuple:
+                                        s += int(float(one_code_time))
+                                if project_ids[1] not in pawithub_pro_dict.keys():
+                                    pawithub_pro_dict[project_ids[1]] = s
+                                else:
+                                    pawithub_pro_dict[project_ids[1]] = s + int(pawithub_pro_dict[project_ids[1]])
+                db.close_connection(conn)
+                print("-------")
+                print(pawithub_pro_dict)
+
+                company_project_worktime['pawithub'] = pawithub_pro_dict
+
+            if company == "wjchin":
+                wjchin_pro_dict = {}
+                conn = db.get_connection("wjchin")
+                sql = """
+                        SELECT project_id,project_name FROM wjchin.project_info
+                    """
+
+                project_id_names = db.execute_sql(conn, sql)
+                db.close_connection(conn)
+                print(project_id_names)
+                conn = db.get_connection("wjchin")
+
+                for project_ids in project_id_names:
+                    # for project_id in project_ids:
+                    sql_main1 = """
+                      SELECT m_main_code FROM wjchin.m_main where m_m_project_id = "{0}" and 
+                      m_main_preset_start_at >= "{1}" and 
+                      m_main_preset_end_at <= "{2}"
+                    """
+                    print(project_ids[0])
+                    print(type(project_ids[0]))
+                    sql_main = sql_main1.format(project_ids[0], start_time, end_time)
+                    print("----------------")
+                    print(sql_main)
+                    # print(sql_main)
+
+                    project_code = db.execute_sql(conn, sql_main)
+
+                    if len(project_code) != 0:
+                        for m_main_code in project_code:
+                            for main_code_str in m_main_code:
+                                print("======")
+                                print(project_ids[0])
+                                print(main_code_str)
+                                sql_code = """
+                                    SELECT m_main_department_preset_working_hours FROM wjchin.m_main_department where m_main_code = '{0}' 
+                                    """
+                                sql = sql_code.format(main_code_str)
+                                project_time = db.execute_sql(conn, sql)
+                                s = 0
+                                for one_code_time_tuple in project_time:
+                                    for one_code_time in one_code_time_tuple:
+                                        s += int(float(one_code_time))
+                                if project_ids[1] not in wjchin_pro_dict.keys():
+                                    wjchin_pro_dict[project_ids[1]] = s
+                                else:
+                                    wjchin_pro_dict[project_ids[1]] = s + int(wjchin_pro_dict[project_ids[1]])
+                db.close_connection(conn)
+                print("-------")
+                print(wjchin_pro_dict)
+
+                company_project_worktime['wjchin'] = wjchin_pro_dict
+
+            if company == "wjip":
+                wjip_pro_dict = {}
+                conn = db.get_connection("wjip")
+                sql = """
+                        SELECT project_id,project_name FROM wjip.project_info
+                    """
+
+                project_id_names = db.execute_sql(conn, sql)
+                db.close_connection(conn)
+                print(project_id_names)
+                conn = db.get_connection("wjip")
+
+                for project_ids in project_id_names:
+                    # for project_id in project_ids:
+                    sql_main1 = """
+                      SELECT m_main_code FROM wjip.m_main where m_m_project_id = "{0}" and 
+                      m_main_preset_start_at >= "{1}" and 
+                      m_main_preset_end_at <= "{2}"
+                    """
+                    print(project_ids[0])
+                    print(type(project_ids[0]))
+                    sql_main = sql_main1.format(project_ids[0], start_time, end_time)
+                    print("----------------")
+                    print(sql_main)
+                    # print(sql_main)
+
+                    project_code = db.execute_sql(conn, sql_main)
+
+                    if len(project_code) != 0:
+                        for m_main_code in project_code:
+                            for main_code_str in m_main_code:
+                                print("======")
+                                print(project_ids[0])
+                                print(main_code_str)
+                                sql_code = """
+                                    SELECT m_main_department_preset_working_hours FROM wjip.m_main_department where m_main_code = '{0}' 
+                                    """
+                                sql = sql_code.format(main_code_str)
+                                project_time = db.execute_sql(conn, sql)
+                                s = 0
+                                for one_code_time_tuple in project_time:
+                                    for one_code_time in one_code_time_tuple:
+                                        s += int(float(one_code_time))
+                                if project_ids[1] not in wjip_pro_dict.keys():
+                                    wjip_pro_dict[project_ids[1]] = s
+                                else:
+                                    wjip_pro_dict[project_ids[1]] = s + int(wjip_pro_dict[project_ids[1]])
+                db.close_connection(conn)
+                print("-------")
+                print(wjip_pro_dict)
+
+                company_project_worktime['wjip'] = wjip_pro_dict
+
+
 
     def get(self, request):
 
@@ -387,6 +610,8 @@ class ReadProject(View):
         data = {"message": "ok"}
 
         data = json.dumps(data)
+
+        logger.info("response data successful::::%s"% data)
 
         return HttpResponse(data)
 
